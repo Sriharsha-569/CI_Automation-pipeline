@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -12,13 +13,19 @@ pipeline {
                 echo "Checking out ${APP_NAME}..."
                 checkout scm
             }
-        }
-
+        }stage('Setup') {
+    steps {
+        echo 'Installing dependencies...'
+        bat 'dir'
+        bat 'python -m pip install --upgrade pip'
+        bat 'pip install -r requirements.txt'
+    }
+}
         stage('Setup') {
             steps {
                 echo 'Installing dependencies...'
-                sh '''
-                    python3 -m pip install --upgrade pip
+                bat '''
+                    python -m pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
             }
@@ -27,7 +34,7 @@ pipeline {
         stage('Lint') {
             steps {
                 echo 'Checking code syntax...'
-                sh 'python3 -m py_compile src/calculator.py'
+                bat 'python -m py_compile src/calculator.py'
                 echo 'Syntax check passed.'
             }
         }
@@ -35,11 +42,8 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                sh '''
-                    pytest tests/ \
-                        --verbose \
-                        --cov=src \
-                        --cov-report=term-missing
+                bat '''
+                    pytest tests/ --verbose --cov=src
                 '''
             }
         }
@@ -47,14 +51,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building Docker image...'
-                sh 'docker build -t ${APP_NAME}:latest -f docker/Dockerfile .'
+                bat 'docker build -t %APP_NAME%:latest -f docker/Dockerfile .'
             }
         }
 
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                sh 'docker run --rm ${APP_NAME}:latest'
+                bat 'docker run --rm %APP_NAME%:latest'
             }
         }
     }
