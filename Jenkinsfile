@@ -13,21 +13,13 @@ pipeline {
                 echo "Checking out ${APP_NAME}..."
                 checkout scm
             }
-        }stage('Setup') {
-    steps {
-        echo 'Installing dependencies...'
-        bat 'dir'
-        bat 'python -m pip install --upgrade pip'
-        bat 'pip install -r requirements.txt'
-    }
-}
+        }
+
         stage('Setup') {
             steps {
                 echo 'Installing dependencies...'
-                bat '''
-                    python -m pip install --upgrade pip
-                    pip install -r requirements.txt
-                '''
+                bat 'python -m pip install --upgrade pip'
+                bat 'pip install -r requirements.txt'
             }
         }
 
@@ -42,9 +34,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                bat '''
-                    pytest tests/ --verbose --cov=src
-                '''
+                bat 'pytest tests/ --verbose'
             }
         }
 
