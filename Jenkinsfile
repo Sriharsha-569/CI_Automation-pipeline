@@ -1,5 +1,4 @@
 
-   
 pipeline {
     agent any
 
@@ -14,8 +13,14 @@ pipeline {
                 echo "Checking out ${APP_NAME}..."
                 checkout scm
             }
-        }
-
+        }stage('Setup') {
+    steps {
+        echo 'Installing dependencies...'
+        bat 'dir'
+        bat 'python -m pip install --upgrade pip'
+        bat 'pip install -r requirements.txt'
+    }
+}
         stage('Setup') {
             steps {
                 echo 'Installing dependencies...'
