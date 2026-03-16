@@ -1,66 +1,73 @@
-/*
- * Study Project: DevOps & Continuous Integration
- * Tool: Jenkins
- * Purpose: Demonstrate a CI workflow with Jenkins (Checkout → Build → Test → Report → Deploy)
- *
- * Author: Sri Harsha Deep Chilakalapudi
- * Seminar: Concepts & Tools for Application Development
- * Date: 02 July 2025
- */
-
-
 pipeline {
     agent any
 
     environment {
-        APP_NAME = "Weather App"
+        APP_NAME = 'CI_Automation-pipeline'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                echo "Checking out ${APP_NAME} code from GitHub..."
-                git branch: 'main', url: 'https://github.com/Sriharsha-569/Weather_A.git'
+                echo "Checking out ${APP_NAME}..."
+                checkout scm
             }
         }
 
-        stage('Build') {
+        stage('Setup') {
             steps {
-                echo "Building ${APP_NAME}..."
-                // Simulate a build step
-                sh 'echo Building files...'
+                echo 'Installing dependencies...'
+                sh '''
+                    python3 -m pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                echo 'Checking code syntax...'
+                sh 'python3 -m py_compile src/calculator.py'
+                echo 'Syntax check passed.'
             }
         }
 
         stage('Test') {
             steps {
-                echo "Running tests for ${APP_NAME}..."
-                // Simulate test execution
-                sh 'echo Running unit tests...'
+                echo 'Running unit tests...'
+                sh '''
+                    pytest tests/ \
+                        --verbose \
+                        --cov=src \
+                        --cov-report=term-missing
+                '''
             }
         }
-        
-       stage('Report') {
+
+        stage('Build') {
             steps {
-               echo "Generating test report for ${APP_NAME}..."
-               sh 'echo Test report generated successfully!'
+                echo 'Building Docker image...'
+                sh 'docker build -t ${APP_NAME}:latest -f docker/Dockerfile .'
             }
         }
-       stage('Deploy') {
+
+        stage('Deploy') {
             steps {
-                echo "Deploying ${APP_NAME} update..."
-                // Simulate deployment
-                sh 'echo Deploying to production server...'
+                echo 'Deploying application...'
+                sh 'docker run --rm ${APP_NAME}:latest'
             }
         }
     }
 
     post {
         success {
-            echo "${APP_NAME} update pipeline completed successfully!"
+            echo 'Pipeline completed. All tests passed.'
         }
         failure {
-            echo "Something went wrong with ${APP_NAME} update pipeline!"
+            echo 'Pipeline failed. Check test results.'
+        }
+        always {
+            echo 'Pipeline finished.'
         }
     }
 }
