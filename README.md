@@ -13,7 +13,7 @@ application with automated testing and Docker containerisation.
 
 | Before | After |
 |--------|-------|
-| echo statements only | Real Python application |
+| echo statements only | Python application |
 | Always passes | Fails if code breaks |
 | No tests | 10 pytest unit tests |
 | No app | Working calculator |
